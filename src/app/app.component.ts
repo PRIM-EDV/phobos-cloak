@@ -9,13 +9,7 @@ import { PhElementsModule } from '../../lib/phobos-elements/ph-elements.module';
     RouterOutlet,
     PhElementsModule
   ],
-  template: `
-    <h1>Welcome to {{title}}!</h1>
-
-    <ph-window></ph-window>
-
-    <router-outlet />
-  `,
+  template: `<router-outlet />`,
   styles: [],
 })
 
