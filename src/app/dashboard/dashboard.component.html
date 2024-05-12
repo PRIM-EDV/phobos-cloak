@@ -12,10 +12,10 @@
 
     <div class="content">
         <div class="workspace">
-            <!-- <ph-window *ngIf="this.tab == 'MAP'" [title]="'SITUATION MAP'" style="flex-grow: 1">
-                <situation-map></situation-map>
+            <ph-window *ngIf="this.tab == 'MAP'" [title]="'CONSENS INFERENCE MATRIX'" style="flex-grow: 1">
+                <ph-bar-chart-3d [data]="data"></ph-bar-chart-3d>
             </ph-window>
-            <ph-window *ngIf="this.tab == 'SQUAD'" [title]="'SQUADS'" style="flex-grow: 1">
+            <!-- <ph-window *ngIf="this.tab == 'SQUAD'" [title]="'SQUADS'" style="flex-grow: 1">
                 <squad></squad>
             </ph-window> -->
         </div>

@@ -1,10 +1,7 @@
-import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { multiply } from 'mathjs';
+import { Bar3D } from './core/bar3d';
 
-const baseMatrix = [
-  [-Math.cos(42 * Math.PI / 180) / 2, Math.cos(-7 * Math.PI / 180), 0],
-  [-Math.sin(42 * Math.PI / 180) / 2, Math.sin(-7 * Math.PI / 180), 1]
-]
 
 @Component({
   selector: 'ph-bar-chart-3d',
@@ -12,27 +9,59 @@ const baseMatrix = [
   styleUrl: './ph-bar3d.component.scss'
 })
 export class PhBar3dComponent implements AfterViewInit {
-  @Input() data: any;
+  @Input() data: any
 
   @ViewChild('chart') chart!: ElementRef<SVGElement>;
 
   ngAfterViewInit(): void {
-    console.log(this.chart)
-    console.log(this.b([0,0,100]))
-    console.log(this.b([0,100,0]))
-    console.log(this.b([100,0,0]))
-
-    this.chart.nativeElement.innerHTML = `
-    <g transform="translate(60 60)">
-    <polygon points="${this.b([0,0,0])} ${this.b([100,0,0])} ${this.b([100,0,100])} ${this.b([0,0,100])}" fill="None"  stroke="black" />
-    <polygon points="${this.b([0,0,0])} ${this.b([0,0,100])} ${this.b([0,100,100])} ${this.b([0,100,0])}" fill="None"  stroke="black" />
-    </g>`
-    }
-
-  b(point: any): string {
-    const res = multiply(baseMatrix, point) as any;
-    console.log(res)
-
-    return `${res[0]}, ${res[1]}`
+    // this.render(this.data);
   }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['data'].isFirstChange()) {
+      this.render(this.data);
+    } else {
+      this.render(this.data, changes['data'].previousValue);
+    }
+  }
+
+  public render(data: any, previousData?: any) {
+    const size = 50;
+    const gap = 20;
+    let innerHTML = '<g transform="translate(60 400)">';
+
+    for (let i = data.length - 1; i >= 0; i--) {
+      for (let j = data[i].length - 1; j >= 0; j--) {
+        if (previousData) {
+          const faces = Bar3D.getFaces({x: size * i + gap * i, y: size * j + gap * j, size: size, height: data[i][j]})
+          const previousFaces = Bar3D.getFaces({x: size * i + gap * i, y: size * j + gap * j, size: size, height: previousData[i][j]})
+          for (const [face, previousFace] of faces.map((face, index) => [face, previousFaces[index]])) {
+            innerHTML += `<polygon points="${previousFace}" fill="red"  stroke="black" class="frame">
+            <animate attributeName="points" dur="1s" fill="remove"
+              to="${face}"
+              from="${previousFace}"/>
+            </polygon>`;
+          }
+        } else {
+          for (const face of Bar3D.getFaces({x: size * i + gap * i, y: size * j + gap * j, size: size, height: data[i][j]})) {
+            innerHTML += `<polygon points="${face}" fill="red"  stroke="black" class="frame" />`;
+          }
+        }
+      }
+    }
+    try {
+      this.chart.nativeElement.innerHTML = innerHTML + '</g>';
+      // Wait for next event cycle to start the animation
+      setTimeout(() => {
+        for (const animation of this.chart.nativeElement.getElementsByTagName('animate')) {
+          animation.beginElement();
+          animation.setAttribute('fill', 'freeze');
+        }
+      }, 1);                                    
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  
 }

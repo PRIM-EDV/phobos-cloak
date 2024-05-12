@@ -1,0 +1,16 @@
+
+svg polygon {
+}
+
+:host ::ng-deep svg {
+    width: 1000px;
+    height: 600px;
+}
+
+:host ::ng-deep svg polygon {
+}
+
+:host ::ng-deep .frame {
+
+    stroke-linejoin: round;
+}
